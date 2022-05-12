@@ -13,8 +13,8 @@ type Finder interface {
 	Find(input string) (string, bool)
 }
 
-func NewFinder(search string, exact, sensitive bool) (Finder, error) {
-	if exact {
+func NewFinder(search string, regexp, sensitive bool) (Finder, error) {
+	if !regexp {
 		if sensitive {
 			return makeExact(search), nil
 		} else {

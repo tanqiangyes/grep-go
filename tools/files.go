@@ -2,6 +2,7 @@
 package tools
 
 import (
+	"bufio"
 	"errors"
 	"io"
 	"os"
@@ -128,4 +129,24 @@ func IsPlainText(input string) bool {
 		}
 	}
 	return true
+}
+
+func ReadFile(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	fileReader := bufio.NewReader(file)
+	patterns := make([]string, 0)
+	for {
+		line, err := fileReader.ReadString('\n')
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, err
+		}
+		patterns = append(patterns, line)
+	}
+	return patterns, nil
 }

@@ -6,13 +6,13 @@ import (
 )
 
 type StdReader struct {
-	finder Finder
+	finder []Finder
 	reader io.Reader
 
 	Output []MatchRes
 }
 
-func (s *StdReader) Print() {
+func (s *StdReader) Result() {
 	//TODO implement me
 	panic("implement me")
 }
@@ -27,13 +27,8 @@ func (s *StdReader) Close() {
 	panic("implement me")
 }
 
-func NewStdReader(reader io.Reader, search string, exact, sensitive bool) (Reader, error) {
-	finder, err := NewFinder(search, exact, sensitive)
-	if err != nil {
-		return nil, err
-	}
+func NewStdReader(reader io.Reader, finder []Finder) (Reader, error) {
 	read := bufio.NewReader(reader)
-
 	return &StdReader{
 		finder: finder,
 		reader: read,

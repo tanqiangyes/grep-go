@@ -14,4 +14,7 @@ var (
 	// ErrNoFilesFound is returned when the files pattern passed to the application
 	// doesn't match any existing files.
 	ErrNoFilesFound = errors.New("no files found")
+
+	// ErrMustWorkWithPipes shows that this must be intended to work with pipes.
+	ErrMustWorkWithPipes = errors.New("The command is intended to work with pipes.")
 )

@@ -6,13 +6,13 @@ import (
 )
 
 type MultiReader struct {
-	finder Finder
+	finder []Finder
 	files  []string
 
 	Output []MatchRes
 }
 
-func (m *MultiReader) Print() {
+func (m *MultiReader) Result() {
 	//TODO implement me
 	panic("implement me")
 }
@@ -27,12 +27,7 @@ func (m *MultiReader) Close() {
 	panic("implement me")
 }
 
-func NewMultiReader(path []string, search string, isRecursive, exact, sensitive bool) (Reader, error) {
-	finder, err := NewFinder(search, exact, sensitive)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(1111, finder)
+func NewMultiReader(path []string, finder []Finder, isRecursive bool) (Reader, error) {
 	files, err := tools.Files(isRecursive, path...)
 	if err != nil {
 		return nil, err
