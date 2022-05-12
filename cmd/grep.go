@@ -7,6 +7,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/tanqiangyes/grep-go/in_errors"
+	"github.com/tanqiangyes/grep-go/reader"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
@@ -25,16 +27,24 @@ func Main() {
 			// a flag for regexp
 			&cli.BoolFlag{
 				Name:     "regexp",
-				Aliases:  []string{"E"},
+				Aliases:  []string{"e"},
 				Usage:    "This flag treats patterns as regular expressions and looks for content in the corresponding file that matches the regular expression.",
 				Required: false,
 				Hidden:   false,
 				Value:    false,
 			},
 			&cli.BoolFlag{
-				Name:     "fixed-strings",
-				Aliases:  []string{"F"},
-				Usage:    "This flag treats patterns as fixed strings and looks for the same content in the corresponding file.",
+				Name:     "recursive",
+				Aliases:  []string{"r"},
+				Usage:    "Whether to look recursively in the path.",
+				Required: false,
+				Hidden:   false,
+				Value:    false,
+			},
+			&cli.BoolFlag{
+				Name:     "ignore-case",
+				Aliases:  []string{"i"},
+				Usage:    "Ignore  case  distinctions,  so that characters that differ, only in case match each other.",
 				Required: false,
 				Hidden:   false,
 				Value:    false,
@@ -42,30 +52,44 @@ func Main() {
 		},
 		Action: func(c *cli.Context) error {
 			//todo
-			fmt.Println(c.Args(), os.Args)
-			//return nil
-			//var (
-			//	r   io.ReadCloser = os.Stdin
-			//	err error
-			//)
-			//
-			//// if there only one argument, show help for the user.
-			//if c.Args().Len() < 1 {
-			//	return fmt.Errorf("error: too few arguments, please --help  to show help text.")
-			//}
-			//
-			//// if no file, so args len is 1, we can try read data from  stdin.
-			//if c.Args().Len() == 1 {
-			//	stat, _ := os.Stdin.Stat()
-			//	if (stat.Mode() & os.ModeNamedPipe) != os.ModeNamedPipe {
-			//		log.Fatal("The command is intended to work with pipes.")
-			//		return nil
-			//	}
-			//	r = os.Stdin
-			//} else {
-			//
-			//}
 
+			//fmt.Println(c.Bool("r"), c.Bool("e"), c.Bool("i"))
+			//return nil
+
+			//return nil
+			var (
+				read reader.Reader
+				err  error
+			)
+			//
+			// if there only one argument, show help for the user.
+			if c.Args().Len() < 1 {
+				return in_errors.ErrArgs
+			}
+
+			// if no file, so args len is 1, we can try read data from  stdin.
+			if c.Args().Len() == 1 {
+				stat, _ := os.Stdin.Stat()
+				if (stat.Mode() & os.ModeNamedPipe) != os.ModeNamedPipe {
+					log.Fatal("The command is intended to work with pipes.")
+					return nil
+				}
+				// readCloser is stdin
+				read, err = reader.NewStdReader(os.Stdin, c.Args().First(), c.Bool("e"), c.Bool("i"))
+				if err != nil {
+					return err
+				}
+			} else {
+				path := c.Args().Slice()[1:]
+				fmt.Println(path)
+				// we should open files or dir, and then read from it.
+				read, err = reader.NewMultiReader(path, c.Args().First(), c.Bool("r"), c.Bool("e"), c.Bool("i"))
+				if err != nil {
+					return err
+				}
+			}
+			read.Run()
+			read.Print()
 			return nil
 		},
 	}
