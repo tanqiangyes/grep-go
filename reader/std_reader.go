@@ -12,9 +12,8 @@ type StdReader struct {
 	Output []MatchRes
 }
 
-func (s *StdReader) Result() {
-	//TODO implement me
-	panic("implement me")
+func (s *StdReader) Result() []MatchRes {
+	return s.Output
 }
 
 func (s *StdReader) Run() {

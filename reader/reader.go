@@ -7,7 +7,7 @@ type Reader interface {
 	// a func to close the reader
 	Close()
 
-	Result()
+	Result() []MatchRes
 }
 
 // a return value

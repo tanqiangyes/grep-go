@@ -55,6 +55,12 @@ func Main() {
 				Value:   false,
 			},
 			&cli.BoolFlag{
+				Name:    "line-number",
+				Aliases: []string{"n"},
+				Usage:   "print the number of lines matched.",
+				Value:   false,
+			},
+			&cli.BoolFlag{
 				Name:    "ignore-case",
 				Aliases: []string{"i"},
 				Usage:   "Ignore  case  distinctions,  so that characters that differ, only in case match each other.",
@@ -93,7 +99,6 @@ func Main() {
 					PrintError(c, err)
 					return nil
 				}
-				fmt.Println(patterns)
 				for _, p := range patterns {
 					finder, err := reader.NewFinder(p, regexp, caseIgnore)
 					if err != nil {
@@ -132,7 +137,7 @@ func Main() {
 				}
 			}
 			read.Run()
-			read.Result()
+			PrintMatch(c, read.Result())
 			return nil
 		},
 	}
@@ -148,4 +153,29 @@ func PrintError(cctx *cli.Context, err error) {
 	fmt.Println()
 	// no need to deal with error
 	cli.ShowAppHelp(cctx)
+}
+
+func PrintMatch(cctx *cli.Context, result []reader.MatchRes) {
+	format := ""
+	line := cctx.Bool("n")
+	for _, res := range result {
+		lens := len(res.Lines)
+		if lens < 1 {
+			continue
+		}
+		format += fmt.Sprintf("File: %v\n", res.Filename)
+		for i := 0; i < lens; i++ {
+			if line {
+				format += fmt.Sprintf("line %v:%v\n", res.Lines, res.MatchString)
+			} else {
+				format += fmt.Sprintf("%v\n", res.MatchString)
+			}
+		}
+		format += fmt.Sprintf("\n\n")
+	}
+	if format == "" {
+		fmt.Println("No matching rows")
+		return
+	}
+	fmt.Println(format)
 }

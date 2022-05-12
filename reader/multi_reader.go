@@ -12,9 +12,8 @@ type MultiReader struct {
 	Output []MatchRes
 }
 
-func (m *MultiReader) Result() {
-	//TODO implement me
-	panic("implement me")
+func (m *MultiReader) Result() []MatchRes {
+	return m.Output
 }
 
 func (m *MultiReader) Run() {
