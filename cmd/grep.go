@@ -166,16 +166,16 @@ func PrintMatch(cctx *cli.Context, result []reader.MatchRes) {
 		format += fmt.Sprintf("File: %v\n", res.Filename)
 		for i := 0; i < lens; i++ {
 			if line {
-				format += fmt.Sprintf("line %v:%v\n", res.Lines, res.MatchString)
+				format += fmt.Sprintf("Line %v: %v", res.Lines[i], res.MatchString[i])
 			} else {
-				format += fmt.Sprintf("%v\n", res.MatchString)
+				format += fmt.Sprintf("%v", res.MatchString[i])
 			}
 		}
-		format += fmt.Sprintf("\n\n")
+		format += fmt.Sprintf("\n")
 	}
 	if format == "" {
 		fmt.Println("No matching rows")
 		return
 	}
-	fmt.Println(format)
+	fmt.Print(format)
 }
