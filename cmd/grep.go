@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+	"strings"
 )
 
 // Version : a version for command
@@ -58,7 +59,7 @@ func Main() {
 				Name:    "line-number",
 				Aliases: []string{"n"},
 				Usage:   "print the number of lines matched.",
-				Value:   false,
+				Value:   true,
 			},
 			&cli.BoolFlag{
 				Name:    "ignore-case",
@@ -92,6 +93,7 @@ func Main() {
 			regexp := c.Bool("e")
 			// ignore case? default false
 			caseIgnore := c.Bool("i")
+			//fmt.Println(caseIgnore)
 			if c.Bool("f") {
 				//this is a file, so we should read from it, then make all finder.
 				patterns, err := tools.ReadFile(pattern)
@@ -100,6 +102,7 @@ func Main() {
 					return nil
 				}
 				for _, p := range patterns {
+					p = strings.Trim(p, "\n")
 					finder, err := reader.NewFinder(p, regexp, caseIgnore)
 					if err != nil {
 						PrintError(c, err)
@@ -114,6 +117,7 @@ func Main() {
 					PrintError(c, err)
 					return nil
 				}
+				//fmt.Println(finder)
 				finders = append(finders, finder)
 			}
 
@@ -128,7 +132,7 @@ func Main() {
 				read, _ = reader.NewStdReader(os.Stdin, finders)
 			} else {
 				path := c.Args().Slice()[1:]
-				fmt.Println(path)
+				//fmt.Println(path)
 				// we should open files or dir, and then read from it.
 				read, err = reader.NewMultiReader(path, finders, c.Bool("r"))
 				if err != nil {
@@ -137,6 +141,10 @@ func Main() {
 				}
 			}
 			read.Run()
+			if read.IsError() != nil {
+				fmt.Println(err)
+				return nil
+			}
 			PrintMatch(c, read.Result())
 			return nil
 		},
@@ -163,12 +171,13 @@ func PrintMatch(cctx *cli.Context, result []reader.MatchRes) {
 		if lens < 1 {
 			continue
 		}
-		format += fmt.Sprintf("File: %v\n", res.Filename)
+		//fmt.sprintf test
+		format += fmt.Sprintf("File:\t\t%v\n", res.Filename)
 		for i := 0; i < lens; i++ {
 			if line {
-				format += fmt.Sprintf("Line %v: %v", res.Lines[i], res.MatchString[i])
+				format += fmt.Sprintf("Line %v:\t\t%v\n", res.Lines[i], res.MatchString[i])
 			} else {
-				format += fmt.Sprintf("%v", res.MatchString[i])
+				format += fmt.Sprintf("%v\n", res.MatchString[i])
 			}
 		}
 		format += fmt.Sprintf("\n")

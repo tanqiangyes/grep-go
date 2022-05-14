@@ -8,6 +8,8 @@ type Reader interface {
 	Close()
 
 	Result() []MatchRes
+
+	IsError() error
 }
 
 // a return value

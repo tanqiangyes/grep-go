@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"strings"
 )
 
 type StdReader struct {
@@ -25,7 +26,6 @@ func (s *StdReader) Run() {
 	match.Filename = "stdin"
 	for {
 		readString, err := br.ReadString('\n')
-		line++
 		if err != nil {
 			// EOF, we should break this loop, and return data.
 			if errors.Is(err, io.EOF) {
@@ -35,11 +35,15 @@ func (s *StdReader) Run() {
 			s.Error = err
 			return
 		}
+		readString = strings.TrimSpace(readString)
+		readString = strings.Trim(readString, " ")
+		readString = strings.Trim(readString, "\n")
 		if s.find(readString) {
 			// we found, add it into match.
 			match.Lines = append(match.Lines, line)
 			match.MatchString = append(match.MatchString, readString)
 		}
+		line++
 	}
 	s.Output = []MatchRes{match}
 	return
@@ -55,8 +59,11 @@ func (s *StdReader) find(str string) bool {
 }
 
 func (s *StdReader) Close() {
-	//TODO implement me
-	panic("implement me")
+	return
+}
+
+func (s *StdReader) IsError() error {
+	return s.Error
 }
 
 func NewStdReader(reader io.Reader, finder []Finder) (Reader, error) {

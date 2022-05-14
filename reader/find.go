@@ -16,9 +16,9 @@ type Finder interface {
 func NewFinder(search string, regexp, sensitive bool) (Finder, error) {
 	if !regexp {
 		if sensitive {
-			return makeExact(search), nil
-		} else {
 			return makeIExact(search), nil
+		} else {
+			return makeExact(search), nil
 		}
 	} else {
 		return makeRegexp(search)
@@ -35,6 +35,7 @@ func makeExact(search string) *ExactFinder {
 }
 
 func (e *ExactFinder) Find(input string) (string, bool) {
+	//fmt.Println(input, e.Search, strings.Contains(input, e.Search))
 	if strings.Contains(input, e.Search) {
 		return input, true
 	}
@@ -52,6 +53,7 @@ func makeIExact(search string) *IExactFinder {
 
 func (i *IExactFinder) Find(input string) (string, bool) {
 	if strings.Contains(strings.ToLower(input), strings.ToLower(i.Search)) {
+		//fmt.Println(input, i.Search)
 		return input, true
 	}
 	return "", false
