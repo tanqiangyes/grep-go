@@ -3,8 +3,10 @@ package reader
 import (
 	"github.com/fatih/color"
 	"github.com/tanqiangyes/grep-go/in_errors"
+	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // Finder is a interface for searching.
@@ -30,11 +32,14 @@ func NewFinder(search string, regexp, sensitive bool) (Finder, error) {
 type ExactFinder struct {
 	Search string
 	// color for print
-	color color.Color
+	color *color.Color
 }
 
 func makeExact(search string) *ExactFinder {
-	return &ExactFinder{Search: search, color: NewColor()}
+	rand.Seed(int64(time.Now().Nanosecond()))
+	index := rand.Int()%len(colorMap) + 1
+	c := color.New(colorMap[int64(index)])
+	return &ExactFinder{Search: search, color: c}
 }
 
 func (e *ExactFinder) Find(input string) (string, bool) {
@@ -49,11 +54,14 @@ func (e *ExactFinder) Find(input string) (string, bool) {
 type IExactFinder struct {
 	Search string
 	// color for print
-	color color.Color
+	color *color.Color
 }
 
 func makeIExact(search string) *IExactFinder {
-	return &IExactFinder{Search: search, color: NewColor()}
+	rand.Seed(int64(time.Now().Nanosecond()))
+	index := rand.Int()%len(colorMap) + 1
+	c := color.New(colorMap[int64(index)])
+	return &IExactFinder{Search: search, color: c}
 }
 
 func (i *IExactFinder) Find(input string) (string, bool) {
@@ -68,7 +76,7 @@ func (i *IExactFinder) Find(input string) (string, bool) {
 type RegexpFinder struct {
 	*regexp.Regexp
 	// color for print
-	color color.Color
+	color *color.Color
 }
 
 func makeRegexp(reg string) (*RegexpFinder, error) {
@@ -76,10 +84,11 @@ func makeRegexp(reg string) (*RegexpFinder, error) {
 	if err != nil {
 		return nil, in_errors.ErrCreateRegexpFinder
 	}
-	return &RegexpFinder{
-		Regexp: compile,
-		color:  NewColor(),
-	}, err
+
+	rand.Seed(int64(time.Now().Nanosecond()))
+	index := rand.Int()%len(colorMap) + 1
+	c := color.New(colorMap[int64(index)])
+	return &RegexpFinder{Regexp: compile, color: c}, err
 }
 
 func (r RegexpFinder) Find(input string) (string, bool) {
