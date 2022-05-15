@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"github.com/fatih/color"
 	"github.com/tanqiangyes/grep-go/in_errors"
 	"regexp"
 	"strings"
@@ -28,16 +29,18 @@ func NewFinder(search string, regexp, sensitive bool) (Finder, error) {
 // ExactFinder ： a exact Finder for searching， Case sensitive。
 type ExactFinder struct {
 	Search string
+	// color for print
+	color color.Color
 }
 
 func makeExact(search string) *ExactFinder {
-	return &ExactFinder{Search: search}
+	return &ExactFinder{Search: search, color: NewColor()}
 }
 
 func (e *ExactFinder) Find(input string) (string, bool) {
-	//fmt.Println(input, e.Search, strings.Contains(input, e.Search))
 	if strings.Contains(input, e.Search) {
-		return input, true
+		// do color replaceAll
+		return strings.ReplaceAll(input, e.Search, e.color.Sprint(e.Search)), true
 	}
 	return "", false
 }
@@ -45,16 +48,18 @@ func (e *ExactFinder) Find(input string) (string, bool) {
 // IExactFinder ： a exact Finder for searching，not Case-sensitive。
 type IExactFinder struct {
 	Search string
+	// color for print
+	color color.Color
 }
 
 func makeIExact(search string) *IExactFinder {
-	return &IExactFinder{Search: search}
+	return &IExactFinder{Search: search, color: NewColor()}
 }
 
 func (i *IExactFinder) Find(input string) (string, bool) {
 	if strings.Contains(strings.ToLower(input), strings.ToLower(i.Search)) {
-		//fmt.Println(input, i.Search)
-		return input, true
+		re := regexp.MustCompile(`(?i)` + i.Search)
+		return re.ReplaceAllString(input, i.color.Sprint(i.Search)), true
 	}
 	return "", false
 }
@@ -62,6 +67,8 @@ func (i *IExactFinder) Find(input string) (string, bool) {
 // RegexpFinder ： a regexp finder for searching string.
 type RegexpFinder struct {
 	*regexp.Regexp
+	// color for print
+	color color.Color
 }
 
 func makeRegexp(reg string) (*RegexpFinder, error) {
@@ -69,12 +76,16 @@ func makeRegexp(reg string) (*RegexpFinder, error) {
 	if err != nil {
 		return nil, in_errors.ErrCreateRegexpFinder
 	}
-	return &RegexpFinder{compile}, err
+	return &RegexpFinder{
+		Regexp: compile,
+		color:  NewColor(),
+	}, err
 }
 
 func (r RegexpFinder) Find(input string) (string, bool) {
 	if r.MatchString(input) {
-		return input, true
+		// use first suitable string as replace string.
+		return r.ReplaceAllString(input, r.color.Sprint("$1")), true
 	}
 	return "", false
 }

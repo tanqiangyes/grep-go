@@ -34,8 +34,7 @@ GLOBAL OPTIONS:
    --version, -v      print the version (default: false)
 ```
 
-### Future:
-- color for every suit text
+### TODO:
 - beautification code 
 - future add
 - add tests for code

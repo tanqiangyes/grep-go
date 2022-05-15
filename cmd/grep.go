@@ -172,7 +172,7 @@ func PrintMatch(cctx *cli.Context, result []reader.MatchRes) {
 			continue
 		}
 		//fmt.sprintf test
-		format += fmt.Sprintf("File:\t\t%v\n", res.Filename)
+		format += fmt.Sprintf("File:\t%v\n", res.Filename)
 		for i := 0; i < lens; i++ {
 			if line {
 				format += fmt.Sprintf("Line %v:\t\t%v\n", res.Lines[i], res.MatchString[i])

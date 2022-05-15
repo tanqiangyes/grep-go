@@ -54,11 +54,13 @@ func (m *MultiReader) dealFileMatch(file string, ch chan MatchRes) {
 		}
 		return
 	}
+	// close the file reader.
+	defer f.Close()
+	// buffer read
 	br := bufio.NewReader(f)
 	var line int64 = 1
 	var match MatchRes
 	match.Filename = f.Name()
-	//fmt.Println(f.Name())
 	for {
 		readString, err := br.ReadString('\n')
 		if err != nil {
@@ -68,15 +70,17 @@ func (m *MultiReader) dealFileMatch(file string, ch chan MatchRes) {
 			}
 			// something wrong, write the error and return.
 			m.Error = err
-			//fmt.Println(f.Name(), err)
+			// send res to chan, make sure res lens.
 			ch <- MatchRes{Filename: f.Name()}
 			return
 		}
+
+		// do some string processing
 		readString = strings.TrimSpace(readString)
 		readString = strings.Trim(readString, " ")
 		readString = strings.Trim(readString, "\n")
-		//fmt.Println(readString, m.find(readString))
-		if m.find(readString) {
+
+		if readString, ok := m.find(readString); ok {
 			// we found, add it into match.
 			match.Lines = append(match.Lines, line)
 			match.MatchString = append(match.MatchString, readString)
@@ -87,18 +91,19 @@ func (m *MultiReader) dealFileMatch(file string, ch chan MatchRes) {
 	return
 }
 
-func (m *MultiReader) find(str string) bool {
+func (m *MultiReader) find(str string) (string, bool) {
+	var found bool
 	for _, finder := range m.finder {
-		if _, ok := finder.Find(str); ok {
-			return ok
+		if s, ok := finder.Find(str); ok {
+			str = s
+			found = true
 		}
 	}
-	return false
+	return str, found
 }
 
 func (m *MultiReader) Close() {
-	//TODO implement me
-	panic("implement me")
+	return
 }
 
 func (m *MultiReader) IsError() error {
@@ -106,11 +111,11 @@ func (m *MultiReader) IsError() error {
 }
 
 func NewMultiReader(path []string, finder []Finder, isRecursive bool) (Reader, error) {
+	// get all files
 	files, err := tools.Files(isRecursive, path...)
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(files)
 	return &MultiReader{
 		finder: finder,
 		files:  files,

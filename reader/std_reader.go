@@ -35,9 +35,12 @@ func (s *StdReader) Run() {
 			s.Error = err
 			return
 		}
+
+		// do some string processing
 		readString = strings.TrimSpace(readString)
 		readString = strings.Trim(readString, " ")
 		readString = strings.Trim(readString, "\n")
+
 		if s.find(readString) {
 			// we found, add it into match.
 			match.Lines = append(match.Lines, line)
